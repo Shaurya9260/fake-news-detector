@@ -1,0 +1,25 @@
+
+C:\Users\shaur\Downloads\fake-news-detector-main (1)\fake-news-detector-main>type .gitignore
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.streamlit/secrets.toml 
+# Kaggle datasets 
+Data/ 
+data/ 
+*.csv 
+# Local databases 
+*.db 
+*.sqlite 
+*.sqlite3 
+# Temporary files 
+*.log 
+.pytest_cache/ 
+.coverage 
+# New model files 
+model_new.pkl 
+vectorizer_new.pkl

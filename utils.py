@@ -4,12 +4,16 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-# Download required NLTK data
-for pkg in ['stopwords', 'wordnet', 'omw-1.4']:
+# Docker installs these English resources at build time. A plain Python run
+# can fetch them on first use. WordNet may be installed as a zip archive.
+for pkg in ('stopwords', 'wordnet'):
     try:
         nltk.data.find(f'corpora/{pkg}')
     except LookupError:
-        nltk.download(pkg)
+        try:
+            nltk.data.find(f'corpora/{pkg}.zip')
+        except LookupError:
+            nltk.download(pkg, quiet=True, raise_on_error=True)
 
 stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()

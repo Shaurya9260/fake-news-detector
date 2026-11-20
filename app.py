@@ -1,5 +1,11 @@
-import streamlit as st
+import os
 import pickle
+from pathlib import Path
+
+import psycopg
+import streamlit as st
+
+from database import recent_predictions, save_prediction
 from utils import clean_text
 
 # ─── Page Config ───────────────────────────────────────────────
@@ -208,11 +214,15 @@ st.markdown("""
 # ─── Load Model ────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
-    model = pickle.load(open("model.pkl", "rb"))
-    vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+    directory = Path(__file__).resolve().parent
+    with (directory / "model.pkl").open("rb") as model_file:
+        model = pickle.load(model_file)
+    with (directory / "vectorizer.pkl").open("rb") as vectorizer_file:
+        vectorizer = pickle.load(vectorizer_file)
     return model, vectorizer
 
 model, vectorizer = load_model()
+history_enabled = bool(os.getenv("PGHOST"))
 
 # ─── Header ────────────────────────────────────────────────────
 st.markdown('<div class="main-badge">⚡ NLP + Machine Learning</div>', unsafe_allow_html=True)
@@ -228,7 +238,7 @@ st.markdown("---")
 st.markdown('<div class="section-label">Article Input</div>', unsafe_allow_html=True)
 
 user_input = st.text_area(
-    label="",
+    label="News article",
     placeholder="Paste a news article or any text here to analyze its credibility...",
     height=200,
     label_visibility="collapsed"
@@ -255,9 +265,15 @@ if analyze_btn:
             prediction = model.predict(vectorized)[0]
             probabilities = model.predict_proba(vectorized)[0]
 
-            fake_prob = probabilities[0] * 100
-            real_prob = probabilities[1] * 100
+            fake_prob = float(probabilities[0]) * 100
+            real_prob = float(probabilities[1]) * 100
             confidence = max(fake_prob, real_prob)
+
+        if history_enabled:
+            try:
+                save_prediction(user_input, "FAKE" if prediction == 0 else "REAL", confidence)
+            except psycopg.Error:
+                st.warning("The prediction could not be saved to the database.")
 
         st.markdown("---")
         st.markdown('<div class="section-label">Analysis Result</div>', unsafe_allow_html=True)
@@ -297,6 +313,28 @@ if analyze_btn:
 
         with st.expander("🔬 Preprocessed Text — Model Input Preview"):
             st.text(cleaned[:500] + "..." if len(cleaned) > 500 else cleaned)
+
+if history_enabled:
+    with st.expander("Prediction history · latest 10", expanded=True):
+        try:
+            history = recent_predictions()
+        except psycopg.Error:
+            st.warning("Prediction history is temporarily unavailable.")
+        else:
+            if history:
+                st.dataframe(
+                    history,
+                    hide_index=True,
+                    width="stretch",
+                    column_config={
+                        "created_at": "Saved at",
+                        "article_preview": "Article preview",
+                        "label": "Prediction",
+                        "confidence": st.column_config.NumberColumn("Confidence", format="%.1f%%"),
+                    },
+                )
+            else:
+                st.caption("Analyze an article to see its result here.")
 
 # ─── Tips ──────────────────────────────────────────────────────
 st.markdown("---")

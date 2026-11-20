@@ -1,0 +1,37 @@
+name: fake-news-detector
+
+services:
+  web:
+    build: .
+    image: fake-news-detector-web:${APP_TAG:-local}
+    pull_policy: never
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8501}:8501"
+    environment:
+      PGHOST: db
+      PGDATABASE: news
+      PGUSER: newsapp
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env or Jenkins}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: news
+      POSTGRES_USER: newsapp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env or Jenkins}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "newsapp", "-d", "news"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  pgdata:
