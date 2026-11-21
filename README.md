@@ -1,146 +1,499 @@
-# Fake News Detector · Docker Compose aur Jenkins practical
+# Fake News Detection Using NLP
 
-Tumhara Streamlit app ab har analysis ka result PostgreSQL mein save karta hai. Is practical mein pehle app apne Windows laptop par kholo. Phir GitHub par ek change push karke dikhao ki Jenkins khud tests chalata hai aur updated app usi laptop par deploy karta hai.
+### End-to-End Machine Learning Application with PostgreSQL, Docker & Jenkins CI/CD
 
-Docker Desktop, Git aur Jenkins pehle se ready hon to **35–55 minute** ka target rakho. Pehli baar Docker images aur Python packages download karne ka time internet speed par depend karega. Saare terminal commands **Windows PowerShell** ke liye hain.
+A machine learning-based web application that classifies news articles as **REAL** or **FAKE** using Natural Language Processing (NLP), TF-IDF vectorization, and Logistic Regression.
 
-## 1. Project folder aur Docker kholo
+The project integrates an interactive Streamlit interface, PostgreSQL prediction history, Docker containerization, and an automated Jenkins CI/CD pipeline.
 
-1. ZIP par right-click → **Extract All**. Andar woh folder kholo jahan `compose.yaml`, `Dockerfile`, `app.py` aur `Jenkinsfile` saath dikhte hain.
-2. File Explorer ke address bar mein `powershell` type karke **Enter** dabao. Terminal isi folder mein khulega.
-3. Docker Desktop start karo. PowerShell mein yeh commands ek-ek karke chalao.
+---
 
-```powershell
-docker version
-docker compose version
-git --version
+## 1. Project Overview
+
+The Fake News Detection System is designed to analyze news articles and predict whether their content resembles real or fake news based on patterns learned from a labeled dataset.
+
+Users can enter news text through the Streamlit web interface, receive a classification result with a confidence score, and review previous predictions stored in PostgreSQL.
+
+The application is deployed locally using Docker Compose. Jenkins automates source-code checkout, Docker image creation, automated testing, deployment, and verification.
+
+**Note:** Predictions are statistical estimates based on the trained model, not independent verification of factual claims.
+
+## 2. Project Objectives
+
+- Develop a machine learning-based news classification system.
+- Implement NLP preprocessing and TF-IDF feature extraction.
+- Train a Logistic Regression classification model.
+- Build an interactive Streamlit web application.
+- Store prediction results in a PostgreSQL database.
+- Maintain prediction history across application restarts.
+- Containerize the application using Docker.
+- Automate testing and local deployment using Jenkins CI/CD.
+- Maintain project source code through Git and GitHub.
+
+## 3. Technology Stack
+
+| Component | Technology |
+|---|---|
+| Programming Language | Python |
+| Data Processing | Pandas, NumPy |
+| Natural Language Processing | NLTK |
+| Feature Extraction | TF-IDF Vectorizer |
+| Machine Learning | Scikit-learn |
+| Classification Algorithm | Logistic Regression |
+| Web Application | Streamlit |
+| Database | PostgreSQL 16 |
+| Database Connectivity | Psycopg |
+| Containerization | Docker, Docker Compose |
+| CI/CD Automation | Jenkins |
+| Version Control | Git, GitHub |
+| Automated Testing | Python unittest |
+
+## 4. System Architecture
+
+The system consists of five main components:
+
+1. **Streamlit Interface:** Accepts news articles and displays classification results.
+2. **NLP Preprocessing:** Cleans and prepares the input text for model inference.
+3. **Machine Learning Model:** Uses TF-IDF features and Logistic Regression to predict REAL or FAKE.
+4. **PostgreSQL Database:** Stores prediction records and supports history retrieval.
+5. **DevOps Pipeline:** Uses GitHub, Jenkins, and Docker to automate testing and local deployment.
+
+### Application Workflow
+
+```text
+                  USER
+                    |
+                    v
+            Streamlit Web App
+                    |
+                    v
+             News Article Input
+                    |
+                    v
+             NLP Preprocessing
+                    |
+                    v
+             TF-IDF Vectorizer
+                    |
+                    v
+          Logistic Regression Model
+                    |
+                    v
+             Prediction Result
+               REAL / FAKE
+                    |
+                    v
+            Confidence Score
+                    |
+                    v
+           PostgreSQL Database
+                    |
+                    v
+             Prediction History
 ```
 
-`docker version` mein **Client** aur **Server** dono dikhne chahiye. Jenkins dashboard bhi kholo. [http://localhost:8080](http://localhost:8080) Docker install karna ho to apne Windows build ke steps yahan milenge. [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
+### CI/CD Workflow
 
-## 2. Dono containers ek saath chalao
+```text
+           GitHub Repository
+                    |
+                    v
+              Jenkins Pipeline
+                    |
+                    v
+             Source Code Checkout
+                    |
+                    v
+              Docker Image Build
+                    |
+                    v
+             Automated Unit Tests
+                    |
+                    v
+          Local Docker Deployment
+                    |
+                    v
+          Application Health Checks
+                    |
+                    v
+             Deployment Success
+```
 
-Pehla block project ki private `.env` file mein database password banati hai. Ye command dobara chalane par pehle se bani file ko rakh leti hai.
+## 5. Dataset and Machine Learning
 
-```powershell
-if (!(Test-Path .env)) {
-    $dbPassword = [guid]::NewGuid().ToString('N')
-    "POSTGRES_PASSWORD=$dbPassword" | Set-Content -Encoding ascii .env
-}
+### Dataset
+
+The machine learning model was developed using a labeled news dataset sourced from Kaggle.
+
+The dataset includes two primary categories:
+
+- **Fake.csv:** Articles labeled as fake news.
+- **True.csv:** Articles labeled as real news.
+
+These datasets were combined and prepared for supervised classification.
+
+### NLP Preprocessing
+
+News text is preprocessed before feature extraction.
+
+The preprocessing workflow includes text normalization and cleaning to reduce unnecessary variation in the input.
+
+### TF-IDF Vectorization
+
+Term Frequency–Inverse Document Frequency (TF-IDF) transforms text into numerical feature vectors.
+
+It helps represent the importance of terms within a document relative to their occurrence across the training corpus.
+
+### Logistic Regression
+
+Logistic Regression is a supervised classification algorithm used to estimate the probability of a news article belonging to a particular class.
+
+The trained model is saved for reuse during inference.
+
+**Model artifacts:**
+
+- `model.pkl` — Trained classification model.
+- `vectorizer.pkl` — Fitted TF-IDF vectorizer.
+
+The application loads these artifacts to classify submitted articles without retraining the model for each prediction.
+
+## 6. Streamlit Web Application
+
+The Streamlit interface provides:
+
+- News article text input.
+- REAL or FAKE prediction.
+- Prediction confidence score.
+- PostgreSQL-backed prediction history.
+- A browser-based interface for demonstrating the model.
+
+**Local application URL:**
+
+http://localhost:8501
+
+The application is accessible on the local machine while the Docker services are running.
+
+## 7. PostgreSQL Database Integration
+
+The application uses PostgreSQL to persist prediction records.
+
+The database runs in a separate Docker container and communicates with the Streamlit application over the Docker Compose network.
+
+### Database Configuration
+
+| Setting | Value |
+|---|---|
+| Database Engine | PostgreSQL 16 |
+| Database Name | `news` |
+| Database User | `newsapp` |
+| Database Service | `db` |
+| Persistent Storage | Docker named volume `pgdata` |
+
+The database password is supplied through environment configuration rather than hard-coded into the application.
+
+### Verify Stored Predictions
+
+Run the following command from the project directory:
+
+```bash
+docker compose exec -T db psql -U newsapp -d news -c "SELECT id, label, confidence, created_at FROM predictions ORDER BY id DESC LIMIT 5;"
+```
+
+This displays the latest prediction records stored in PostgreSQL.
+
+### Data Persistence
+
+The database uses a Docker named volume to preserve records across normal container restarts and recreation.
+
+**Important:** Avoid using `docker compose down -v` unless you intentionally want to remove the database volume and its stored data.
+
+## 8. Docker Containerization
+
+Docker packages the application and its dependencies into a reproducible environment.
+
+Docker Compose manages two services:
+
+| Service | Purpose |
+|---|---|
+| `web` | Runs the Streamlit application |
+| `db` | Runs the PostgreSQL database |
+
+The application service depends on the database health check.
+
+### Prerequisites
+
+Install:
+
+- Docker Desktop
+- Git
+- Jenkins (for CI/CD demonstrations)
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/Shaurya9260/fake-news-detector.git
+cd fake-news-detector
+```
+
+### Configure Environment Variables
+
+Create a `.env` file in the project root.
+
+Example:
+
+```env
+POSTGRES_PASSWORD=replace_with_a_strong_password
+```
+
+Do not commit your actual `.env` file or database credentials to GitHub.
+
+### Build and Start the Application
+
+```bash
 docker compose up -d --build --wait
+```
+
+### Verify Container Health
+
+```bash
 docker compose ps
 ```
 
-`web` aur `db` ki rows mein **healthy** dikhega. `web` app chala raha hai aur `db` PostgreSQL. Browser mein app kholo. [http://localhost:8501](http://localhost:8501)
+Both the `web` and `db` services should report a healthy status.
 
-## 3. Ek prediction save karke database mein dekho
+### Open the Application
 
-Yeh sample app mein paste karo aur **Analyze Article** dabao.
+Visit:
 
-> The city council approved the budget on Wednesday after a public meeting. The plan funds a new library and expands bus service next year.
+http://localhost:8501
 
-Is ZIP ke model ke saath is sample ka expected label `REAL` hai. **Prediction history · latest 10** mein uski row milegi. Neeche wali command wahi data seedha PostgreSQL se padhti hai.
+### Stop Containers
 
-```powershell
-$sql = "SELECT id, label, article_preview FROM predictions ORDER BY id DESC LIMIT 3"
-docker compose exec -T db psql -U newsapp -d news -c $sql
+```bash
+docker compose stop
 ```
 
-**History check karne ke liye** neeche ki commands chalao, phir app refresh karo. Pehle wali row ab bhi dikhni chahiye. PostgreSQL ka data `pgdata` volume mein hai. `down` ke saath `-v` lagane se volume delete hota hai.
+### Restart Existing Containers
 
-```powershell
-docker compose down
-docker compose up -d --wait --pull never
+```bash
+docker compose start
 ```
 
-## 4. Project GitHub par push karo
+## 9. Jenkins CI/CD Pipeline
 
-**Naya practical repo banane ke liye** GitHub → **+ → New repository**. Naam `fake-news-detector-devops` rakh sakte ho. Visibility apni preference se chuno. README, `.gitignore` aur license wale options khaali rakho. **Create repository** ke baad HTTPS URL copy karo. Apne project wale PowerShell mein commands ek-ek karke chalao. URL maange to copied URL paste karke Enter dabao.
+The project uses Jenkins to automate application integration, testing, and local deployment.
 
-```powershell
-git init -b main
-git add .
-git status --short
-git commit -m "Add Compose database and Jenkins deployment"
-$repoUrl = Read-Host "Paste your GitHub repository HTTPS URL"
-git remote add origin $repoUrl
-git push -u origin main
+### Pipeline Configuration
+
+| Property | Configuration |
+|---|---|
+| Jenkins Job | `Fake-News-Detection-CICD` |
+| Pipeline Type | Pipeline from SCM |
+| Source Control | GitHub |
+| Branch | `main` |
+| Pipeline Definition | `Jenkinsfile` |
+| Deployment Platform | Local Docker Desktop |
+
+### Pipeline Stages
+
+**Stage 1 — Checkout**
+
+Jenkins retrieves the latest project source code from GitHub.
+
+**Stage 2 — Build**
+
+Jenkins builds the application Docker image using the project Dockerfile.
+
+**Stage 3 — Automated Testing**
+
+The pipeline runs Python automated tests against an isolated PostgreSQL test database.
+
+**Stage 4 — Deployment**
+
+After successful testing, Jenkins deploys the application using Docker Compose.
+
+**Stage 5 — Verification and Cleanup**
+
+The pipeline verifies application and database connectivity and cleans up temporary CI resources.
+
+### Automated Build Trigger
+
+The Jenkins pipeline uses SCM polling to check the repository for changes:
+
+```groovy
+pollSCM('H/2 * * * *')
 ```
 
-`git status` mein `.env.example` dikh sakti hai. Private `.env` ko `.gitignore` exclude karta hai. Sign-in prompt aaye to apna GitHub account chuno. GitHub refresh karo. Repo ki top level par `Jenkinsfile`, `compose.yaml`, `Dockerfile`, `tests/` aur dono `.pkl` files dikhni chahiye.
+When changes are detected, Jenkins can automatically start a new pipeline run.
 
-**Agar project ka GitHub repo pehle se hai**, clone kiya hua folder kholo. Clone ki root mein updated ZIP ke project files copy karo, hidden files bhi. `.env` Step 2 wale folder mein hi rahegi. Jenkins ke liye password copy karte waqt wahi PowerShell use karo. `git status` mein changes dekho, phir `git add .`, `git commit -m "Add Compose and Jenkins"` aur `git push` chalao. Neeche Jenkins mein isi repo ki branch select karna. [GitHub ka Windows guide](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github?platform=windows)
+The actual polling schedule is determined by Jenkins.
 
-## 5. Jenkins ko Docker aur database se connect karo
+### CI/CD Verification
 
-**Windows node ko label do.** Jenkins → **Manage Jenkins → Nodes** → apna local Windows node → **Configure**. Agar pehle ke practical built-in node par chalte the, wahi node kholo. **Labels** mein existing labels ke baad space dekar `docker-lab` add karo → **Save**. Yeh naam Jenkins ko batata hai ki build kis laptop par chalani hai.
+A successful local pipeline execution confirmed:
 
-**Database password save karo.** Project wale PowerShell mein yeh line chalao. Step 2 ka password clipboard mein aa jayega.
+- GitHub source-code checkout.
+- Docker image build.
+- Automated Python tests.
+- PostgreSQL test integration.
+- Docker Compose deployment.
+- Application and database health verification.
 
-```powershell
-(ConvertFrom-StringData (Get-Content .env -Raw)).POSTGRES_PASSWORD | Set-Clipboard
+**Verified Jenkins Result:** Build #3 — SUCCESS.
+
+## 10. Automated Testing
+
+The project includes automated tests in:
+
+```text
+tests/test_practical.py
 ```
 
-Jenkins → **Manage Jenkins → Credentials → System → Global credentials (unrestricted) → Add Credentials**. Kind **Secret text**, Scope **Global**, Secret mein **Ctrl+V**, aur ID mein exactly `fake-news-db-password` daalo. **Create** dabao. Jenkins aur manual Compose ab same database password use karenge.
+The tests verify important application behaviors, including:
 
-**Private GitHub repo ke liye** Jenkins ko repo padhne ka access bhi chahiye. Existing GitHub read credential ho to Step 6 mein select karo. Naya banana ho to GitHub → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**. Selected repository chuno aur **Contents → Read-only** do. Jenkins ke **Add Credentials** mein Kind **Username with password**, Username apna GitHub username, Password mein token aur ID `github-read` rakho. Public repo ka checkout anonymous chal sakta hai. [GitHub tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) · [Jenkins Git credentials](https://plugins.jenkins.io/git/#plugin-content-using-credentials)
+1. Text preprocessing.
+2. Handling of blank input without saving an unwanted prediction.
+3. Persistence and retrieval of REAL/FAKE prediction records across database sessions.
 
-## 6. GitHub se Jenkins Pipeline chalao
+### Test Results
 
-Jenkins dashboard → **New Item** → naam `Fake-News-DevOps` → **Pipeline** → **OK**. Neeche **Pipeline** section mein ye fields bharo.
+| Metric | Result |
+|---|---|
+| Automated Tests Executed | 3 |
+| Tests Passed | 3 |
+| Tests Failed | 0 |
+| Jenkins Build #3 | SUCCESS |
 
-| Field | Value |
-| --- | --- |
-| Definition | `Pipeline script from SCM` |
-| SCM | `Git` |
-| Repository URL | Step 4 wala HTTPS URL |
-| Credentials | Private repo ke liye GitHub credential, public repo ke liye `None` |
-| Branch Specifier | `*/main` ya tumhari actual branch, jaise `*/master` |
-| Script Path | `Jenkinsfile` |
+The pipeline prevents deployment when the automated testing stage fails.
 
-**Save → Build Now → build number → Console Output** kholo. Docker Desktop aur Jenkins build ke dauran chalte rehne chahiye.
+## 11. Functional Verification
 
-| Stage | Kya hota hai | Kis cheez se verify karoge |
-| --- | --- | --- |
-| Checkout | Jenkins GitHub se commit leta hai | Console mein checkout ka commit |
-| Build image | Docker image banata hai. Image ke andar pip packages install karta hai | `fake-news-detector-web` image par commit aur build number ka tag |
-| Test model and database | Teen Python tests temporary PostgreSQL se chalte hain | `Ran 3 tests` aur `OK` |
-| Deploy and verify | Jenkins wahi tested image persistent `web` aur `db` ke saath chalata hai | `Web to PostgreSQL OK`, dono services healthy aur `Finished: SUCCESS` |
+The application was also tested manually through the Streamlit interface.
 
-Test fail ho to Jenkins deploy stage skip karta hai. Jenkins isi laptop ke Docker Desktop mein image build aur deploy karta hai. [Jenkins Pipeline setup](https://www.jenkins.io/doc/book/pipeline/getting-started/#defining-a-pipeline-in-scm)
+The verification included:
 
-## 7. Automatic deployment ka proof dikhao
+- Submitting sample news articles.
+- Receiving REAL and FAKE classifications.
+- Displaying prediction confidence.
+- Viewing saved prediction history.
+- Querying prediction records directly from PostgreSQL.
+- Confirming both Docker services were healthy.
 
-Project folder mein `notepad app.py` kholo. `Article Input</div>` search karo aur sirf displayed text `Article Input` ko `News Article Input` karo. File save karo. Phir chalao.
+These tests confirm that the application's main workflow operates locally.
 
-```powershell
-git add app.py
-git commit -m "Update the article input heading"
-git push
+They do not establish the model's accuracy on an independent evaluation dataset.
+
+## 12. Project Screenshots
+
+Screenshots of the completed practical are organized in the `Project_Screenshots` directory.
+
+| Screenshot | Description |
+|---|---|
+| `01_Streamlit_Homepage.png` | Streamlit application interface |
+| `02_Fake_News_Prediction.png` | FAKE prediction demonstration |
+| `03_Real_News_Prediction.png` | REAL prediction demonstration |
+| `04_Prediction_History.png` | Stored prediction history |
+| `05_PostgreSQL_Database.png` | PostgreSQL prediction records |
+| `06_Docker_Containers.png` | Healthy Docker services |
+| `07_Jenkins_Pipeline_SUCCESS.png` | Successful Jenkins pipeline |
+| `08_Jenkins_Automated_Tests.png` | Automated test execution |
+| `09_GitHub_Repository.png` | GitHub source-code repository |
+
+The screenshots can be included in the project report and published in the repository after confirming that no credentials or sensitive information are visible.
+
+## 13. Project Structure
+
+```text
+fake-news-detector/
+|
+|-- app.py
+|-- database.py
+|-- utils.py
+|
+|-- model.pkl
+|-- vectorizer.pkl
+|
+|-- prepare_dataset.py
+|-- train_new_model.py
+|-- evaluate_model.py
+|
+|-- Dockerfile
+|-- compose.yaml
+|-- Jenkinsfile
+|-- .dockerignore
+|-- .env.example
+|-- .gitignore
+|
+|-- requirements.txt
+|-- README.md
+|
+|-- tests/
+|   |-- test_practical.py
+|
+|-- Project_Screenshots/
+|   |-- 01_Streamlit_Homepage.png
+|   |-- 02_Fake_News_Prediction.png
+|   |-- 03_Real_News_Prediction.png
+|   |-- 04_Prediction_History.png
+|   |-- 05_PostgreSQL_Database.png
+|   |-- 06_Docker_Containers.png
+|   |-- 07_Jenkins_Pipeline_SUCCESS.png
+|   |-- 08_Jenkins_Automated_Tests.png
+|   |-- 09_GitHub_Repository.png
+|
+|-- README_backup.md
 ```
 
-Pehli manual build ke baad Jenkins har 2 minute GitHub par changes check karta hai. Agli build khud start hogi. Success aate hi browser mein app refresh karo. Nayi heading aur purani prediction history ek saath dikhengi. Agli build queue mein ho to agent available hote hi chalegi. [Jenkins SCM polling](https://www.jenkins.io/doc/book/pipeline/syntax/#triggers)
+The screenshot directory and backup file are local working files unless explicitly committed to GitHub.
 
-**Practical ke liye ye screenshots lo** — (1) `docker compose ps` mein dono healthy services, (2) app result aur prediction history, (3) SQL output, (4) GitHub repo ki files, (5) automatically triggered Jenkins build ka `Finished: SUCCESS` aur (6) browser mein nayi heading.
+## 14. Security and Best Practices
 
-## Agar koi step atke
+The project follows several basic development and deployment practices:
 
-| Kya dikh raha hai | Kya karo |
-| --- | --- |
-| `docker` command nahi mil rahi ya `Server` nahi dikh raha | Docker Desktop kholo, Linux containers mode aur engine ready hone tak wait karo. PowerShell dobara kholo aur `docker version` chalao. |
-| `POSTGRES_PASSWORD` missing ya password authentication failed | Manual commands `.env` wale folder se chalao. Jenkins credential mein usi file ka original password paste karo. PostgreSQL pehli initialization ka password use karta hai. |
-| `port 8501 is already allocated` | Purani local Streamlit window mein `Ctrl+C` dabao. `docker ps` se dekho ki kaunsa container port use kar raha hai. Agar dono apps chalani hain to `.env` mein `WEB_PORT=8502` aur Jenkins node ke **Node Properties → Environment variables** mein `WEB_PORT` ki value `8502` set karo. Phir port `8502` kholo. |
-| `Still waiting to schedule task` | **Manage Jenkins → Nodes** mein dekho ki `docker-lab` label wala Windows node online hai aur uska ek executor available hai. |
-| PowerShell mein Docker chalta hai, Jenkins mein `access denied` ya Docker pipe nahi milti | Neeche same Windows login wala agent banao. |
-| `Jenkinsfile` nahi mil raha | Repo ki root mein `Jenkinsfile` ki spelling, uppercase J, branch aur Jenkins ka Script Path check karo. |
-| Ek container unhealthy hai | Project folder mein `docker compose logs --tail 40 web db` chalao. Jenkins fail ho to **Console Output** mein pehle failed stage ki error dekho. |
+- Environment variables are used for database credentials.
+- Private `.env` files should remain excluded from Git.
+- The PostgreSQL database is not published directly to the host network.
+- Streamlit is bound to the local loopback interface.
+- Jenkins credentials should be stored securely.
+- Automated tests run before deployment.
+- PostgreSQL data is stored in a persistent Docker volume.
 
-**Docker access ki error theek karne ke liye** usi Windows login se Jenkins agent connect karo jismein Docker Desktop chal raha hai.
+This configuration is intended for local development and practical demonstration. Production deployment would require additional security, monitoring, access control, and infrastructure configuration.
 
-1. Jenkins → **Manage Jenkins → Nodes → New Node**. Naam `windows-docker`, type **Permanent Agent**.
-2. **Remote root directory** mein apne user ke writable folder ka full path do, jaise `C:\Users\Shaurya\jenkins-agent`. **Labels** mein `docker-lab`, **Number of executors** mein `1` rakho.
-3. **Launch method → Launch agent by connecting it to the controller** chuno. **Use WebSocket** option dikhe to select karo. Save karo.
-4. Node ke page par Windows ke liye dikhne wali download aur `java -jar agent.jar ...` commands ko Docker chalane wale login ki PowerShell mein chalao. `java -version` available hona chahiye. Ye terminal khula rakho. Agent command mein private secret hota hai, use screenshot se bahar rakho.
-5. Naya node **online** dikhne par purane node ke labels se sirf `docker-lab` hatao. Job par **Build Now** dabao.
+## 15. Future Enhancements
 
-Demo ke baad containers temporarily band karne ke liye project folder se `docker compose stop` chalao. Agli baar `docker compose start` se wahi containers aur history khul jayenge.
+Potential improvements include:
+
+- Comparing additional classification algorithms.
+- Training on newer and more diverse datasets.
+- Improving model explainability.
+- Adding authenticated user accounts.
+- Developing a REST API.
+- Adding monitoring and logging dashboards.
+- Expanding automated tests.
+- Deploying the application to a managed cloud platform.
+- Integrating external fact-checking sources.
+
+## 16. Limitations
+
+- The model classifies text based on patterns learned from its training data.
+- A REAL prediction does not guarantee that every claim is factually correct.
+- Model performance may vary across topics, languages, and newer events.
+- Confidence scores are model estimates and should not be treated as factual certainty.
+- The demonstrated deployment runs locally, not on a public production server.
+
+## 17. Repository
+
+**GitHub:** https://github.com/Shaurya9260/fake-news-detector
+
+**Project:** Fake News Detection Using NLP
+
+**Category:** Machine Learning, NLP, Data Science, DevOps and CI/CD
+
+---
+
+**Project Summary**
+
+This project demonstrates an end-to-end machine learning application combining NLP-based classification, a Streamlit web interface, PostgreSQL persistence, Docker containerization, automated Python testing, and Jenkins CI/CD deployment.
+
+It showcases the integration of machine learning development with practical database engineering and DevOps workflows.
